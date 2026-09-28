@@ -140,6 +140,11 @@ sed -i 's/is_android_mobile = is_android_any \&\& !is_android_desktop;/is_androi
 sed -i 's|if (!IncognitoUtils.shouldOpenIncognitoAsWindow() \|\| is|if (!shouldShowNewIncognitoWindow() \|\| is|' chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/TabbedAppMenuPropertiesDelegate.java
 sed -i 's|if (!separateIncognitoWindow \|\| is|if (!shouldShowNewIncognitoWindow() \|\| is|' chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/TabbedAppMenuPropertiesDelegate.java
 
+# bottom: menu
+sed -i 's|mModelList = mDelegate.getMenuItems();|&\n        if (isFromBottomBar \|\| mBrowserControlsStateProvider.getControlsPosition() == BrowserControlsStateProvider.ControlsPosition.BOTTOM) { for (int i = 0; i < mModelList.size(); i++) mModelList.move(mModelList.size() - 1, i); }|' chrome/browser/ui/android/appmenu/internal/java/src/org/chromium/chrome/browser/ui/appmenu/AppMenuHandlerImpl.java # reverse in place
+sed -i 's|mListView = contentView.findViewById(R.id.app_menu_list);|&\n        mListView.setStackFromBottom(isFromBottomBar \|\| controlsPosition == ControlsPosition.BOTTOM);|' chrome/browser/ui/android/appmenu/internal/java/src/org/chromium/chrome/browser/ui/appmenu/AppMenu.java
+sed -i 's|getInitialHeightForView(i)|getInitialHeightForView(mListView != null \&\& mListView.isStackFromBottom() ? itemCount - 1 - i : i)|;s|canBeLastVisibleInitialView(i)|canBeLastVisibleInitialView(mListView != null \&\& mListView.isStackFromBottom() ? itemCount - 1 - i : i)|' chrome/browser/ui/android/appmenu/internal/java/src/org/chromium/chrome/browser/ui/appmenu/AppMenu.java # size from bottom
+
 # crbug.com/406136787: load unpacked
 sed -i 's|assert treeId.equals(documentId);|&\n if ("com.android.externalstorage.documents".equals(mAuthority)) { String fastId = mRelativePath.isEmpty() ? treeId : (treeId.endsWith(":") ? treeId + mRelativePath : treeId + "/" + mRelativePath); Uri fast = DocumentsContract.buildDocumentUriUsingTree(tree, fastId); return contentUriExists(fast) ? fast : null; }|' base/android/java/src/org/chromium/base/VirtualDocumentPath.java
 
